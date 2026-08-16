@@ -30,7 +30,9 @@ const submitButton =
     document.getElementById("submitButton");
 
 
-// Search and filter
+// ========================================
+// SEARCH AND FILTER
+// ========================================
 
 const search =
     document.getElementById("search");
@@ -39,7 +41,9 @@ const filterCategory =
     document.getElementById("filterCategory");
 
 
-// Budget elements
+// ========================================
+// BUDGET ELEMENTS
+// ========================================
 
 const budgetInput =
     document.getElementById("budgetInput");
@@ -61,6 +65,16 @@ const budgetProgress =
 
 const budgetMessage =
     document.getElementById("budgetMessage");
+
+
+// ========================================
+// CHART
+// ========================================
+
+const expenseChartCanvas =
+    document.getElementById("expenseChart");
+
+let expenseChart = null;
 
 
 // ========================================
@@ -163,7 +177,6 @@ form.addEventListener("submit", function(event) {
 
                 }
 
-
                 return transaction;
 
             });
@@ -217,12 +230,16 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // Save
+    // ====================================
+    // SAVE DATA
+    // ====================================
 
     saveTransactions();
 
 
-    // Update display
+    // ====================================
+    // UPDATE EVERYTHING
+    // ====================================
 
     displayTransactions();
 
@@ -230,8 +247,12 @@ form.addEventListener("submit", function(event) {
 
     updateBudget();
 
+    updateExpenseChart();
 
-    // Clear form
+
+    // ====================================
+    // CLEAR FORM
+    // ====================================
 
     form.reset();
 
@@ -280,7 +301,8 @@ function displayTransactions() {
                 transaction.category === selectedCategory;
 
 
-            return matchesSearch && matchesCategory;
+            return matchesSearch &&
+                   matchesCategory;
 
         });
 
@@ -397,6 +419,8 @@ function deleteTransaction(id) {
 
     updateBudget();
 
+    updateExpenseChart();
+
 }
 
 
@@ -421,7 +445,7 @@ function editTransaction(id) {
     }
 
 
-    // Put data into form
+    // Put transaction data into form
 
     type.value =
         transaction.type;
@@ -450,7 +474,7 @@ function editTransaction(id) {
         "Update Transaction";
 
 
-    // Add Cancel button
+    // Add cancel button
 
     if (!document.getElementById("cancelButton")) {
 
@@ -648,9 +672,7 @@ function updateBudget() {
         percentage + "%";
 
 
-    // ====================================
-    // BUDGET MESSAGE
-    // ====================================
+    // Budget messages
 
     if (expenseTotal > monthlyBudget) {
 
@@ -716,12 +738,146 @@ setBudgetButton.addEventListener(
         budgetInput.value = "";
 
 
-        // Update budget display
+        // Update budget
 
         updateBudget();
 
     }
 );
+
+
+// ========================================
+// UPDATE EXPENSE CHART
+// ========================================
+
+function updateExpenseChart() {
+
+    // Check if Chart.js loaded
+
+    if (
+        typeof Chart === "undefined" ||
+        !expenseChartCanvas
+    ) {
+
+        return;
+
+    }
+
+
+    const categoryTotals = {};
+
+
+    // Calculate expenses by category
+
+    transactions.forEach(function(transaction) {
+
+        if (transaction.type === "expense") {
+
+            if (
+                !categoryTotals[transaction.category]
+            ) {
+
+                categoryTotals[transaction.category] = 0;
+
+            }
+
+
+            categoryTotals[transaction.category] +=
+                Number(transaction.amount);
+
+        }
+
+    });
+
+
+    const labels =
+        Object.keys(categoryTotals);
+
+
+    const values =
+        Object.values(categoryTotals);
+
+
+    // Destroy old chart
+
+    if (expenseChart !== null) {
+
+        expenseChart.destroy();
+
+        expenseChart = null;
+
+    }
+
+
+    // No expenses
+
+    if (labels.length === 0) {
+
+        return;
+
+    }
+
+
+    // Create new chart
+
+    expenseChart =
+        new Chart(
+            expenseChartCanvas,
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Expenses",
+
+                            data: values
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom"
+
+                        },
+
+
+                        title: {
+
+                            display: true,
+
+                            text: "Expenses by Category"
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
 
 
 // ========================================
@@ -761,3 +917,5 @@ displayTransactions();
 updateSummary();
 
 updateBudget();
+
+updateExpenseChart();

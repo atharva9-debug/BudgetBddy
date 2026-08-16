@@ -353,3 +353,34 @@ button:hover {
     }
 
 }
+
+/* ================================
+   EXPENSE CHART
+================================ */
+
+.chart-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.chart-section h2 {
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    margin: auto;
+}
+
+@media (max-width: 700px) {
+
+    .chart-container {
+        height: 300px;
+    }
+
+}
