@@ -5,13 +5,9 @@
 const form = document.getElementById("expenseForm");
 
 const type = document.getElementById("type");
-
 const category = document.getElementById("category");
-
 const description = document.getElementById("description");
-
 const amount = document.getElementById("amount");
-
 const date = document.getElementById("date");
 
 const transactionList =
@@ -31,7 +27,7 @@ const submitButton =
 
 
 // ========================================
-// SEARCH AND FILTER
+// SEARCH & FILTER
 // ========================================
 
 const search =
@@ -42,7 +38,7 @@ const filterCategory =
 
 
 // ========================================
-// BUDGET ELEMENTS
+// BUDGET
 // ========================================
 
 const budgetInput =
@@ -78,23 +74,30 @@ let expenseChart = null;
 
 
 // ========================================
-// LOAD SAVED TRANSACTIONS
+// STATISTICS
+// ========================================
+
+const totalTransactionsDisplay =
+    document.getElementById("totalTransactions");
+
+const averageExpenseDisplay =
+    document.getElementById("averageExpense");
+
+const monthlyExpenseDisplay =
+    document.getElementById("monthlyExpense");
+
+const topCategoryDisplay =
+    document.getElementById("topCategory");
+
+
+// ========================================
+// LOAD SAVED DATA
 // ========================================
 
 let transactions =
     JSON.parse(localStorage.getItem("transactions")) || [];
 
-
-// ========================================
-// EDITING ID
-// ========================================
-
 let editingId = null;
-
-
-// ========================================
-// LOAD MONTHLY BUDGET
-// ========================================
 
 let monthlyBudget =
     Number(localStorage.getItem("monthlyBudget")) || 0;
@@ -123,8 +126,6 @@ form.addEventListener("submit", function(event) {
     event.preventDefault();
 
 
-    // Check date
-
     if (date.value === "") {
 
         alert("Please select a date.");
@@ -133,8 +134,6 @@ form.addEventListener("submit", function(event) {
 
     }
 
-
-    // Check amount
 
     if (
         amount.value === "" ||
@@ -148,9 +147,7 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // ====================================
-    // UPDATE EXISTING TRANSACTION
-    // ====================================
+    // UPDATE EXISTING
 
     if (editingId !== null) {
 
@@ -162,15 +159,10 @@ form.addEventListener("submit", function(event) {
                     return {
 
                         id: editingId,
-
                         type: type.value,
-
                         category: category.value,
-
                         description: description.value,
-
                         amount: Number(amount.value),
-
                         date: date.value
 
                     };
@@ -183,7 +175,6 @@ form.addEventListener("submit", function(event) {
 
 
         editingId = null;
-
 
         submitButton.textContent =
             "Add Transaction";
@@ -202,24 +193,17 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // ====================================
-    // ADD NEW TRANSACTION
-    // ====================================
+    // ADD NEW
 
     else {
 
         const transaction = {
 
             id: Date.now(),
-
             type: type.value,
-
             category: category.value,
-
             description: description.value,
-
             amount: Number(amount.value),
-
             date: date.value
 
         };
@@ -230,29 +214,17 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // ====================================
-    // SAVE DATA
-    // ====================================
-
     saveTransactions();
 
 
-    // ====================================
     // UPDATE EVERYTHING
-    // ====================================
 
     displayTransactions();
-
     updateSummary();
-
     updateBudget();
-
     updateExpenseChart();
+    updateStatistics();
 
-
-    // ====================================
-    // CLEAR FORM
-    // ====================================
 
     form.reset();
 
@@ -268,33 +240,23 @@ function displayTransactions() {
     transactionList.innerHTML = "";
 
 
-    // Search text
-
     const searchText =
         search.value.toLowerCase();
 
-
-    // Selected category
 
     const selectedCategory =
         filterCategory.value;
 
 
-    // Filter transactions
-
     const filteredTransactions =
         transactions.filter(function(transaction) {
 
-
-            // Search by description
 
             const matchesSearch =
                 transaction.description
                     .toLowerCase()
                     .includes(searchText);
 
-
-            // Category filter
 
             const matchesCategory =
                 selectedCategory === "All" ||
@@ -307,8 +269,6 @@ function displayTransactions() {
         });
 
 
-    // No results
-
     if (filteredTransactions.length === 0) {
 
         transactionList.innerHTML =
@@ -318,8 +278,6 @@ function displayTransactions() {
 
     }
 
-
-    // Display transactions
 
     filteredTransactions.forEach(function(transaction) {
 
@@ -349,9 +307,7 @@ function displayTransactions() {
                 </p>
 
                 <p class="transaction-date">
-
                     📅 ${transaction.date || "No date"}
-
                 </p>
 
             </div>
@@ -360,9 +316,7 @@ function displayTransactions() {
             <div>
 
                 <strong class="${transaction.type}">
-
                     ${sign}₹${transaction.amount}
-
                 </strong>
 
 
@@ -413,13 +367,12 @@ function deleteTransaction(id) {
 
     saveTransactions();
 
+
     displayTransactions();
-
     updateSummary();
-
     updateBudget();
-
     updateExpenseChart();
+    updateStatistics();
 
 }
 
@@ -445,8 +398,6 @@ function editTransaction(id) {
     }
 
 
-    // Put transaction data into form
-
     type.value =
         transaction.type;
 
@@ -463,18 +414,12 @@ function editTransaction(id) {
         transaction.date || "";
 
 
-    // Store editing ID
-
     editingId = id;
 
-
-    // Change button
 
     submitButton.textContent =
         "Update Transaction";
 
-
-    // Add cancel button
 
     if (!document.getElementById("cancelButton")) {
 
@@ -501,8 +446,6 @@ function editTransaction(id) {
     }
 
 
-    // Scroll to form
-
     window.scrollTo({
 
         top: 0,
@@ -522,9 +465,7 @@ function cancelEdit() {
 
     editingId = null;
 
-
     form.reset();
-
 
     submitButton.textContent =
         "Add Transaction";
@@ -550,7 +491,6 @@ function cancelEdit() {
 function updateSummary() {
 
     let income = 0;
-
     let expenses = 0;
 
 
@@ -580,10 +520,8 @@ function updateSummary() {
     incomeDisplay.textContent =
         `₹${income}`;
 
-
     expensesDisplay.textContent =
         `₹${expenses}`;
-
 
     balanceDisplay.textContent =
         `₹${balance}`;
@@ -596,8 +534,6 @@ function updateSummary() {
 // ========================================
 
 function updateBudget() {
-
-    // Calculate total expenses
 
     const expenseTotal =
         transactions
@@ -614,19 +550,13 @@ function updateBudget() {
             }, 0);
 
 
-    // Display budget
-
     budgetAmountDisplay.textContent =
         `₹${monthlyBudget}`;
 
 
-    // Display spent
-
     budgetSpentDisplay.textContent =
         `₹${expenseTotal}`;
 
-
-    // Calculate remaining
 
     const remaining =
         monthlyBudget - expenseTotal;
@@ -635,8 +565,6 @@ function updateBudget() {
     budgetRemainingDisplay.textContent =
         `₹${remaining}`;
 
-
-    // No budget
 
     if (monthlyBudget <= 0) {
 
@@ -651,13 +579,9 @@ function updateBudget() {
     }
 
 
-    // Calculate percentage
-
     let percentage =
         (expenseTotal / monthlyBudget) * 100;
 
-
-    // Maximum 100%
 
     if (percentage > 100) {
 
@@ -666,13 +590,9 @@ function updateBudget() {
     }
 
 
-    // Update progress bar
-
     budgetProgress.style.width =
         percentage + "%";
 
-
-    // Budget messages
 
     if (expenseTotal > monthlyBudget) {
 
@@ -725,20 +645,14 @@ setBudgetButton.addEventListener(
             budget;
 
 
-        // Save budget
-
         localStorage.setItem(
             "monthlyBudget",
             monthlyBudget
         );
 
 
-        // Clear input
-
         budgetInput.value = "";
 
-
-        // Update budget
 
         updateBudget();
 
@@ -751,8 +665,6 @@ setBudgetButton.addEventListener(
 // ========================================
 
 function updateExpenseChart() {
-
-    // Check if Chart.js loaded
 
     if (
         typeof Chart === "undefined" ||
@@ -767,15 +679,11 @@ function updateExpenseChart() {
     const categoryTotals = {};
 
 
-    // Calculate expenses by category
-
     transactions.forEach(function(transaction) {
 
         if (transaction.type === "expense") {
 
-            if (
-                !categoryTotals[transaction.category]
-            ) {
+            if (!categoryTotals[transaction.category]) {
 
                 categoryTotals[transaction.category] = 0;
 
@@ -793,12 +701,9 @@ function updateExpenseChart() {
     const labels =
         Object.keys(categoryTotals);
 
-
     const values =
         Object.values(categoryTotals);
 
-
-    // Destroy old chart
 
     if (expenseChart !== null) {
 
@@ -809,16 +714,12 @@ function updateExpenseChart() {
     }
 
 
-    // No expenses
-
     if (labels.length === 0) {
 
         return;
 
     }
 
-
-    // Create new chart
 
     expenseChart =
         new Chart(
@@ -852,7 +753,6 @@ function updateExpenseChart() {
 
                     maintainAspectRatio: false,
 
-
                     plugins: {
 
                         legend: {
@@ -860,7 +760,6 @@ function updateExpenseChart() {
                             position: "bottom"
 
                         },
-
 
                         title: {
 
@@ -876,6 +775,157 @@ function updateExpenseChart() {
 
             }
         );
+
+}
+
+
+// ========================================
+// UPDATE DASHBOARD STATISTICS
+// ========================================
+
+function updateStatistics() {
+
+    // TOTAL TRANSACTIONS
+
+    totalTransactionsDisplay.textContent =
+        transactions.length;
+
+
+    // GET EXPENSES
+
+    const expenses =
+        transactions.filter(function(transaction) {
+
+            return transaction.type === "expense";
+
+        });
+
+
+    // ====================================
+    // AVERAGE EXPENSE
+    // ====================================
+
+    let totalExpense = 0;
+
+
+    expenses.forEach(function(transaction) {
+
+        totalExpense +=
+            Number(transaction.amount);
+
+    });
+
+
+    let averageExpense = 0;
+
+
+    if (expenses.length > 0) {
+
+        averageExpense =
+            totalExpense / expenses.length;
+
+    }
+
+
+    averageExpenseDisplay.textContent =
+        `₹${averageExpense.toFixed(0)}`;
+
+
+    // ====================================
+    // THIS MONTH'S EXPENSE
+    // ====================================
+
+    const now = new Date();
+
+    const currentMonth =
+        now.getMonth();
+
+    const currentYear =
+        now.getFullYear();
+
+
+    let monthlyExpense = 0;
+
+
+    expenses.forEach(function(transaction) {
+
+        if (!transaction.date) {
+
+            return;
+
+        }
+
+
+        const transactionDate =
+            new Date(transaction.date);
+
+
+        if (
+            transactionDate.getMonth() === currentMonth &&
+            transactionDate.getFullYear() === currentYear
+        ) {
+
+            monthlyExpense +=
+                Number(transaction.amount);
+
+        }
+
+    });
+
+
+    monthlyExpenseDisplay.textContent =
+        `₹${monthlyExpense}`;
+
+
+    // ====================================
+    // TOP SPENDING CATEGORY
+    // ====================================
+
+    const categoryTotals = {};
+
+
+    expenses.forEach(function(transaction) {
+
+        if (!categoryTotals[transaction.category]) {
+
+            categoryTotals[transaction.category] = 0;
+
+        }
+
+
+        categoryTotals[transaction.category] +=
+            Number(transaction.amount);
+
+    });
+
+
+    let topCategory = "None";
+
+    let highestAmount = 0;
+
+
+    for (
+        const categoryName in categoryTotals
+    ) {
+
+        if (
+            categoryTotals[categoryName] >
+            highestAmount
+        ) {
+
+            highestAmount =
+                categoryTotals[categoryName];
+
+            topCategory =
+                categoryName;
+
+        }
+
+    }
+
+
+    topCategoryDisplay.textContent =
+        topCategory;
 
 }
 
@@ -919,3 +969,5 @@ updateSummary();
 updateBudget();
 
 updateExpenseChart();
+
+updateStatistics();
