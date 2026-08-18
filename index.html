@@ -20,13 +20,42 @@
 
     <!-- HEADER -->
 
+
     <header>
 
-        <h1>BudgetBuddy-Smart Student Expense Tracker</h1>
+    <div class="header-content">
 
-        <p>Manage your money easily</p>
+        <div>
+            <h1>BudgetBuddy-Smart Student Expense Tracker</h1>
+            <p>Manage your money easily</p>
+        </div>
 
-    </header>
+        <button id="themeButton" type="button">
+            🌙 Dark Mode
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- NAVIGATION -->
+
+<nav class="navbar">
+
+    <a href="#dashboard">🏠 Dashboard</a>
+
+    <a href="#budget">🎯 Budget</a>
+
+    <a href="#statistics">📊 Statistics</a>
+
+    <a href="#transactions">💰 Transactions</a>
+
+</nav>
+
+
+
+    
 
 
     <main>
@@ -34,7 +63,7 @@
 
         <!-- SUMMARY -->
 
-        <section class="summary">
+        <section class="summary" id="dashboard">
 
             <div class="card">
 
@@ -68,7 +97,7 @@
 
         <!-- MONTHLY BUDGET -->
 
-<section class="budget-section">
+<section class="budget-section" id="budget">
 
     <h2>Monthly Budget</h2>
 
@@ -127,7 +156,7 @@
 
 <!-- DASHBOARD STATISTICS -->
 
-<section class="stats-section">
+<section class="stats-section" id="statistics"></section>
 
     <h2>Spending Statistics</h2>
 
@@ -178,7 +207,7 @@
 
         <!-- ADD TRANSACTION -->
 
-        <section class="transaction-form">
+        <section class="transaction-form"></section>
 
             <h2>Add Transaction</h2>
 
@@ -285,7 +314,7 @@
 
         <!-- TRANSACTIONS -->
 
-        <section class="transactions">
+        <section class="transactions" id="transactions"></section>
 
             <h2>Recent Transactions</h2>
 
@@ -334,6 +363,10 @@
                 </select>
 
             </div>
+
+            <button id="exportButton" type="button">
+    📥 Export Transactions
+</button>
 
 
             <!-- TRANSACTION LIST -->

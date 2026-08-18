@@ -126,6 +126,8 @@ form.addEventListener("submit", function(event) {
     event.preventDefault();
 
 
+    // Check date
+
     if (date.value === "") {
 
         alert("Please select a date.");
@@ -134,6 +136,8 @@ form.addEventListener("submit", function(event) {
 
     }
 
+
+    // Check amount
 
     if (
         amount.value === "" ||
@@ -147,7 +151,9 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // UPDATE EXISTING
+    // ====================================
+    // UPDATE EXISTING TRANSACTION
+    // ====================================
 
     if (editingId !== null) {
 
@@ -159,10 +165,15 @@ form.addEventListener("submit", function(event) {
                     return {
 
                         id: editingId,
+
                         type: type.value,
+
                         category: category.value,
+
                         description: description.value,
+
                         amount: Number(amount.value),
+
                         date: date.value
 
                     };
@@ -175,6 +186,7 @@ form.addEventListener("submit", function(event) {
 
 
         editingId = null;
+
 
         submitButton.textContent =
             "Add Transaction";
@@ -193,17 +205,24 @@ form.addEventListener("submit", function(event) {
     }
 
 
-    // ADD NEW
+    // ====================================
+    // ADD NEW TRANSACTION
+    // ====================================
 
     else {
 
         const transaction = {
 
             id: Date.now(),
+
             type: type.value,
+
             category: category.value,
+
             description: description.value,
+
             amount: Number(amount.value),
+
             date: date.value
 
         };
@@ -214,17 +233,29 @@ form.addEventListener("submit", function(event) {
     }
 
 
+    // ====================================
+    // SAVE
+    // ====================================
+
     saveTransactions();
 
 
+    // ====================================
     // UPDATE EVERYTHING
+    // ====================================
 
     displayTransactions();
+
     updateSummary();
+
     updateBudget();
+
     updateExpenseChart();
+
     updateStatistics();
 
+
+    // Clear form
 
     form.reset();
 
@@ -269,6 +300,8 @@ function displayTransactions() {
         });
 
 
+    // No transactions
+
     if (filteredTransactions.length === 0) {
 
         transactionList.innerHTML =
@@ -278,6 +311,8 @@ function displayTransactions() {
 
     }
 
+
+    // Display transactions
 
     filteredTransactions.forEach(function(transaction) {
 
@@ -369,9 +404,13 @@ function deleteTransaction(id) {
 
 
     displayTransactions();
+
     updateSummary();
+
     updateBudget();
+
     updateExpenseChart();
+
     updateStatistics();
 
 }
@@ -421,17 +460,22 @@ function editTransaction(id) {
         "Update Transaction";
 
 
+    // Create cancel button
+
     if (!document.getElementById("cancelButton")) {
 
         const cancelButton =
             document.createElement("button");
 
 
-        cancelButton.type = "button";
+        cancelButton.type =
+            "button";
 
-        cancelButton.id = "cancelButton";
+        cancelButton.id =
+            "cancelButton";
 
-        cancelButton.className = "cancel-btn";
+        cancelButton.className =
+            "cancel-btn";
 
         cancelButton.textContent =
             "Cancel Edit";
@@ -465,7 +509,9 @@ function cancelEdit() {
 
     editingId = null;
 
+
     form.reset();
+
 
     submitButton.textContent =
         "Add Transaction";
@@ -491,6 +537,7 @@ function cancelEdit() {
 function updateSummary() {
 
     let income = 0;
+
     let expenses = 0;
 
 
@@ -520,8 +567,10 @@ function updateSummary() {
     incomeDisplay.textContent =
         `₹${income}`;
 
+
     expensesDisplay.textContent =
         `₹${expenses}`;
+
 
     balanceDisplay.textContent =
         `₹${balance}`;
@@ -566,6 +615,8 @@ function updateBudget() {
         `₹${remaining}`;
 
 
+    // No budget
+
     if (monthlyBudget <= 0) {
 
         budgetProgress.style.width =
@@ -593,6 +644,8 @@ function updateBudget() {
     budgetProgress.style.width =
         percentage + "%";
 
+
+    // Budget warnings
 
     if (expenseTotal > monthlyBudget) {
 
@@ -701,9 +754,12 @@ function updateExpenseChart() {
     const labels =
         Object.keys(categoryTotals);
 
+
     const values =
         Object.values(categoryTotals);
 
+
+    // Remove old chart
 
     if (expenseChart !== null) {
 
@@ -714,12 +770,16 @@ function updateExpenseChart() {
     }
 
 
+    // No expenses
+
     if (labels.length === 0) {
 
         return;
 
     }
 
+
+    // Create chart
 
     expenseChart =
         new Chart(
@@ -785,13 +845,13 @@ function updateExpenseChart() {
 
 function updateStatistics() {
 
-    // TOTAL TRANSACTIONS
+    // Total transactions
 
     totalTransactionsDisplay.textContent =
         transactions.length;
 
 
-    // GET EXPENSES
+    // Get expenses
 
     const expenses =
         transactions.filter(function(transaction) {
@@ -837,8 +897,10 @@ function updateStatistics() {
 
     const now = new Date();
 
+
     const currentMonth =
         now.getMonth();
+
 
     const currentYear =
         now.getFullYear();
@@ -900,6 +962,7 @@ function updateStatistics() {
 
 
     let topCategory = "None";
+
 
     let highestAmount = 0;
 
@@ -971,3 +1034,313 @@ updateBudget();
 updateExpenseChart();
 
 updateStatistics();
+
+
+// ========================================
+// EXPORT TRANSACTIONS TO CSV
+// ========================================
+
+const exportButton =
+    document.getElementById("exportButton");
+
+
+function exportTransactions() {
+
+    // Check transactions
+
+    if (transactions.length === 0) {
+
+        alert(
+            "There are no transactions to export."
+        );
+
+        return;
+
+    }
+
+
+    // CSV header
+
+    let csv =
+        "Date,Type,Category,Description,Amount\n";
+
+
+    // Add transactions
+
+    transactions.forEach(function(transaction) {
+
+        // ====================================
+        // FORMAT DATE
+        // ====================================
+
+        let formattedDate = "";
+
+
+        if (transaction.date) {
+
+            const parts =
+                transaction.date.split("-");
+
+
+            if (parts.length === 3) {
+
+                // YYYY-MM-DD
+                // becomes
+                // DD-MM-YYYY
+
+                formattedDate =
+                    parts[2] +
+                    "-" +
+                    parts[1] +
+                    "-" +
+                    parts[0];
+
+            }
+
+            else {
+
+                formattedDate =
+                    transaction.date;
+
+            }
+
+        }
+
+
+        // ====================================
+        // SAFE TEXT
+        // ====================================
+
+        const safeCategory =
+            String(
+                transaction.category || ""
+            )
+            .replace(/"/g, '""');
+
+
+        const safeDescription =
+            String(
+                transaction.description || ""
+            )
+            .replace(/"/g, '""');
+
+
+        const safeType =
+            String(
+                transaction.type || ""
+            )
+            .replace(/"/g, '""');
+
+
+        // ====================================
+        // ADD CSV ROW
+        // ====================================
+
+        csv +=
+            `"${formattedDate}",` +
+            `"${safeType}",` +
+            `"${safeCategory}",` +
+            `"${safeDescription}",` +
+            `"${transaction.amount}"\n`;
+
+    });
+
+
+    // ========================================
+    // CREATE CSV FILE
+    // ========================================
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type: "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    // ========================================
+    // CREATE DOWNLOAD LINK
+    // ========================================
+
+    const link =
+        document.createElement("a");
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "student_expenses.csv";
+
+
+    link.style.display =
+        "none";
+
+
+    document.body.appendChild(link);
+
+
+    // Download
+
+    link.click();
+
+
+    // Remove link
+
+    document.body.removeChild(link);
+
+
+    // Free memory
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+// ========================================
+// EXPORT BUTTON EVENT
+// ========================================
+
+if (exportButton) {
+
+    exportButton.addEventListener(
+        "click",
+        exportTransactions
+    );
+
+}
+
+
+// ========================================
+// DARK MODE
+// ========================================
+
+const themeButton =
+    document.getElementById("themeButton");
+
+
+// Load saved theme
+
+const savedTheme =
+    localStorage.getItem("theme");
+
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add("dark-mode");
+
+    themeButton.textContent =
+        "☀️ Light Mode";
+
+}
+
+
+// ========================================
+// CHANGE THEME
+// ========================================
+
+themeButton.addEventListener(
+    "click",
+    function() {
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+        // Check current mode
+
+        if (
+            document.body.classList.contains(
+                "dark-mode"
+            )
+        ) {
+
+            themeButton.textContent =
+                "☀️ Light Mode";
+
+
+            localStorage.setItem(
+                "theme",
+                "dark"
+            );
+
+        }
+
+        else {
+
+            themeButton.textContent =
+                "🌙 Dark Mode";
+
+
+            localStorage.setItem(
+                "theme",
+                "light"
+            );
+
+        }
+
+    }
+);
+
+// ========================================
+// ACTIVE NAVIGATION
+// ========================================
+
+const navLinks =
+    document.querySelectorAll(".navbar a");
+
+const sections =
+    document.querySelectorAll("main section");
+
+
+function updateActiveNavigation() {
+
+    let currentSection = "";
+
+    sections.forEach(function(section) {
+
+        const sectionTop =
+            section.offsetTop - 150;
+
+        if (window.scrollY >= sectionTop) {
+
+            currentSection =
+                section.getAttribute("id");
+
+        }
+
+    });
+
+
+    navLinks.forEach(function(link) {
+
+        link.classList.remove("active");
+
+        const target =
+            link.getAttribute("href").substring(1);
+
+        if (target === currentSection) {
+
+            link.classList.add("active");
+
+        }
+
+    });
+
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateActiveNavigation
+);
+
+
+updateActiveNavigation();
